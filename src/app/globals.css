@@ -1,26 +1,24 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@plugin "@tailwindcss/typography";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #f4f2ec;
+  --color-foreground: #1b1c1d;
+  --font-body: "Noto Sans JP Variable", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  @apply scroll-smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-background text-foreground font-body flex min-h-dvh flex-col antialiased;
+}
+
+footer {
+  @apply mt-auto;
+}
+
+button:hover {
+  @apply cursor-pointer;
 }
