@@ -16,6 +16,7 @@ export default function ContactPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-16 lg:px-8">
       <SectionHeading
+        as="h1"
         title="Contact"
         description="案件相談、見積もり、制作体制の相談などを受け付けています。"
       />

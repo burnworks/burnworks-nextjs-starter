@@ -9,6 +9,7 @@
 - Home / About / Contact / 404 のページ雛形
 - `metadata`, `sitemap`, `robots`, `opengraph-image` による SEO 基盤
 - `/api/contact` + クライアントフォーム（Webhook 連携可能）
+- 汎用的な基本セキュリティヘッダー
 - ESLint + Prettier + Husky + lint-staged
 - GitHub Actions CI（lint + build）
 
@@ -36,16 +37,18 @@ npm run dev
 
 ## Environment Variables
 
-| 変数名                           | 説明                                                                                                         | 例                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| `NEXT_PUBLIC_SITE_URL`           | 公開サイト URL。canonical URL・sitemap・robots に使用される。**本番デプロイ前に必ず本番 URL へ変更すること** | `https://example.com`         |
-| `NEXT_PUBLIC_SITE_NAME`          | サイト正式名。`<title>` タグや OG タグに使用                                                                 | `My Company`                  |
-| `NEXT_PUBLIC_SITE_SHORT_NAME`    | ヘッダーロゴ表示用の短縮名                                                                                   | `MyBiz`                       |
-| `NEXT_PUBLIC_SITE_DESCRIPTION`   | 共通メタディスクリプション                                                                                   | `サービス紹介サイト`          |
-| `NEXT_PUBLIC_CONTACT_EMAIL`      | フッターおよび Contact ページに表示するメールアドレス                                                        | `hello@example.com`           |
-| `NEXT_PUBLIC_X_HANDLE`           | X (Twitter) のアカウントハンドル。Twitter Card の `creator` に使用                                           | `@example`                    |
-| `NEXT_PUBLIC_SITE_LAST_MODIFIED` | sitemap の `lastModified` に使用する日付。コンテンツ更新時に変更する                                         | `2025-06-01`                  |
-| `CONTACT_WEBHOOK_URL`            | 問い合わせ内容の転送先 Webhook URL。フォームを利用する環境では必須                                           | `https://hooks.slack.com/...` |
+| 変数名                           | 説明                                                                                | 例                            |
+| -------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
+| `NEXT_PUBLIC_SITE_URL`           | 公開サイト URL。canonical URL・sitemap・robots に使用される。**本番ビルドでは必須** | `https://example.com`         |
+| `NEXT_PUBLIC_SITE_NAME`          | サイト正式名。`<title>` タグや OG タグに使用                                        | `My Company`                  |
+| `NEXT_PUBLIC_SITE_SHORT_NAME`    | ヘッダーロゴ表示用の短縮名                                                          | `MyBiz`                       |
+| `NEXT_PUBLIC_SITE_DESCRIPTION`   | 共通メタディスクリプション                                                          | `サービス紹介サイト`          |
+| `NEXT_PUBLIC_CONTACT_EMAIL`      | フッターおよび Contact ページに表示するメールアドレス                               | `hello@example.com`           |
+| `NEXT_PUBLIC_X_HANDLE`           | X (Twitter) のアカウントハンドル。Twitter Card の `creator` に使用                  | `@example`                    |
+| `NEXT_PUBLIC_SITE_LAST_MODIFIED` | sitemap の `lastModified` に使用する日付。コンテンツ更新時に変更する                | `2025-06-01`                  |
+| `CONTACT_WEBHOOK_URL`            | 問い合わせ内容の転送先 Webhook URL。フォームを利用する環境では必須                  | `https://hooks.slack.com/...` |
+
+本番ビルドでは `NEXT_PUBLIC_SITE_URL` が未設定の場合にエラーとなります。また、URL・メールアドレス・日付として不正な値が指定されている場合は、開発環境でも起動時にエラーとなります。サイトURL末尾の `/` は自動的に除去されます。
 
 ## Scripts
 
@@ -96,9 +99,11 @@ Vercel へのデプロイを推奨します。
 
 1. リポジトリを Vercel に接続してプロジェクトを作成
 2. Vercel ダッシュボードの **Settings > Environment Variables** で本番用の環境変数を設定
-3. **`NEXT_PUBLIC_SITE_URL` を必ず本番 URL に変更する**（未変更のままだと canonical・sitemap・robots が `http://localhost:3000` のまま出力される）
+3. **`NEXT_PUBLIC_SITE_URL` を必ず本番 URL に変更する**（未設定または不正な値では本番ビルドが失敗する）
 
 その他のホスティング（AWS、Cloudflare Pages 等）でも動作しますが、`/api/contact` などの API routes を使用するため、静的エクスポート（`output: "export"`）には対応していません。
+
+`X-Content-Type-Options`、`Referrer-Policy`、`X-Frame-Options`、`Permissions-Policy` は全ルートに適用されます。CSP と HSTS は利用する外部サービスや HTTPS・サブドメイン構成に合わせて追加してください。カメラ、マイク、位置情報を利用する案件では `Permissions-Policy` を調整してください。
 
 ## Out of Scope
 

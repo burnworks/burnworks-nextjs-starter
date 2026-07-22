@@ -15,6 +15,7 @@ export default function AboutPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-16 lg:px-8">
       <SectionHeading
+        as="h1"
         title="About This Starter"
         description="Webサイト制作を素早く開始するための、最小かつ実践的なテンプレートです。"
       />

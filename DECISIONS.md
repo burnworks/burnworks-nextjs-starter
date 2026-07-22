@@ -34,10 +34,16 @@
 
 - サイト名・URL・メール等のサイト設定は `NEXT_PUBLIC_*` 環境変数で上書き可能にする
 - コードを変更せずに案件ごとの設定を切り替えられることを優先する
-- 環境変数が未設定の場合はフォールバック値を使い、クローン直後でも動作する状態を保つ
+- 開発時は環境変数のフォールバック値を使い、クローン直後でも動作する状態を保つ
+- 本番ビルドでは `NEXT_PUBLIC_SITE_URL` を必須とし、URL・メールアドレス・日付の不正値は起動時に検出する
 
 ## Contact Form
 
 - デフォルトはシンプルなフォームと API route
 - 必要時のみ Webhook で外部連携する
 - スパム対策として honeypot フィールドを実装する
+
+## Security Headers
+
+- 全ルートに汎用的な `X-Content-Type-Options`、`Referrer-Policy`、`X-Frame-Options`、`Permissions-Policy` を適用する
+- CSP は外部スクリプトや接続先、HSTS は HTTPS とサブドメインの運用方針に依存するため、案件ごとに設定する
