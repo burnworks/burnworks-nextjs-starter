@@ -86,8 +86,9 @@
 
 ## 4. 問い合わせ連携
 
-- `CONTACT_WEBHOOK_URL` 未設定時: API は受理メッセージのみ返す
+- `CONTACT_WEBHOOK_URL` 未設定時: API は `503 Service Unavailable` を返す
 - `CONTACT_WEBHOOK_URL` 設定時: `/api/contact` から外部 Webhook へ POST
+- API のリクエストボディ上限は 16 KiB、Webhook のタイムアウトは 10 秒
 - 送信される JSON の構造や接続先の詳細は `README.md` の「Contact Webhook」セクションを参照
 
 ## 5. デプロイ前チェック

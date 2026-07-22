@@ -1,23 +1,23 @@
 import { NextResponse } from "next/server";
 
-type ContactPayload = {
-  name?: string;
-  email?: string;
-  message?: string;
-  website?: string;
-};
-
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_MESSAGE_LENGTH = 1000;
+const MAX_REQUEST_BODY_BYTES = 16 * 1024;
+const WEBHOOK_TIMEOUT_MS = 10_000;
 
 const getString = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
 
-const validatePayload = (payload: ContactPayload) => {
-  const name = getString(payload.name);
-  const email = getString(payload.email);
-  const message = getString(payload.message);
-  const website = getString(payload.website);
+const validatePayload = (payload: unknown) => {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return { error: "リクエスト形式が不正です。" };
+  }
+
+  const values = payload as Record<string, unknown>;
+  const name = getString(values.name);
+  const email = getString(values.email);
+  const message = getString(values.message);
+  const website = getString(values.website);
 
   if (website) {
     return { isSpam: true as const, name, email, message };
@@ -38,33 +38,79 @@ const validatePayload = (payload: ContactPayload) => {
   return { name, email, message, isSpam: false as const };
 };
 
-export async function POST(request: Request) {
-  let payload: ContactPayload;
+const readJsonBody = async (request: Request) => {
+  const contentType = request.headers.get("content-type")?.split(";", 1)[0];
+  if (contentType?.trim().toLowerCase() !== "application/json") {
+    return {
+      error: "Content-Type は application/json を指定してください。",
+      status: 415,
+    } as const;
+  }
+
+  const contentLength = Number(request.headers.get("content-length"));
+  if (contentLength > MAX_REQUEST_BODY_BYTES) {
+    return {
+      error: "リクエストサイズが上限を超えています。",
+      status: 413,
+    } as const;
+  }
+
+  if (!request.body) {
+    return { error: "リクエスト形式が不正です。", status: 400 } as const;
+  }
+
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let body = "";
+  let receivedBytes = 0;
 
   try {
-    payload = (await request.json()) as ContactPayload;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      receivedBytes += value.byteLength;
+      if (receivedBytes > MAX_REQUEST_BODY_BYTES) {
+        await reader.cancel();
+        return {
+          error: "リクエストサイズが上限を超えています。",
+          status: 413,
+        } as const;
+      }
+
+      body += decoder.decode(value, { stream: true });
+    }
+
+    body += decoder.decode();
+    return { data: JSON.parse(body) as unknown } as const;
   } catch {
+    return { error: "リクエスト形式が不正です。", status: 400 } as const;
+  } finally {
+    reader.releaseLock();
+  }
+};
+
+export async function POST(request: Request) {
+  const webhookUrl = process.env.CONTACT_WEBHOOK_URL;
+  if (!webhookUrl) {
     return NextResponse.json(
-      { message: "リクエスト形式が不正です。" },
-      { status: 400 },
+      { message: "現在、お問い合わせフォームを利用できません。" },
+      { status: 503 },
     );
   }
 
-  const validated = validatePayload(payload);
+  const body = await readJsonBody(request);
+  if ("error" in body) {
+    return NextResponse.json({ message: body.error }, { status: body.status });
+  }
+
+  const validated = validatePayload(body.data);
   if ("error" in validated) {
     return NextResponse.json({ message: validated.error }, { status: 400 });
   }
 
   if (validated.isSpam) {
     return NextResponse.json({ message: "送信を受け付けました。" });
-  }
-
-  const webhookUrl = process.env.CONTACT_WEBHOOK_URL;
-  if (!webhookUrl) {
-    return NextResponse.json({
-      message:
-        "送信を受け付けました。`CONTACT_WEBHOOK_URL` を設定すると外部通知に連携できます。",
-    });
   }
 
   let response: Response;
@@ -86,11 +132,19 @@ export async function POST(request: Request) {
         },
       }),
       cache: "no-store",
+      signal: AbortSignal.timeout(WEBHOOK_TIMEOUT_MS),
     });
-  } catch {
+  } catch (error) {
+    const isTimeout =
+      error instanceof DOMException && error.name === "TimeoutError";
+
     return NextResponse.json(
-      { message: "問い合わせ連携に失敗しました。設定を確認してください。" },
-      { status: 502 },
+      {
+        message: isTimeout
+          ? "問い合わせ連携がタイムアウトしました。時間をおいて再度お試しください。"
+          : "問い合わせ連携に失敗しました。設定を確認してください。",
+      },
+      { status: isTimeout ? 504 : 502 },
     );
   }
 

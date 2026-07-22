@@ -45,7 +45,7 @@ npm run dev
 | `NEXT_PUBLIC_CONTACT_EMAIL`      | フッターおよび Contact ページに表示するメールアドレス                                                        | `hello@example.com`           |
 | `NEXT_PUBLIC_X_HANDLE`           | X (Twitter) のアカウントハンドル。Twitter Card の `creator` に使用                                           | `@example`                    |
 | `NEXT_PUBLIC_SITE_LAST_MODIFIED` | sitemap の `lastModified` に使用する日付。コンテンツ更新時に変更する                                         | `2025-06-01`                  |
-| `CONTACT_WEBHOOK_URL`            | 問い合わせ内容の転送先 Webhook URL。未設定時は受理メッセージのみ返す（後述）                                 | `https://hooks.slack.com/...` |
+| `CONTACT_WEBHOOK_URL`            | 問い合わせ内容の転送先 Webhook URL。フォームを利用する環境では必須                                           | `https://hooks.slack.com/...` |
 
 ## Scripts
 
@@ -70,6 +70,10 @@ src/
 
 `CONTACT_WEBHOOK_URL` に Webhook の受信エンドポイントを設定すると、フォーム送信時に以下の JSON を POST します。
 Slack の Incoming Webhook、Discord の Webhook、Make（旧 Integromat）、Zapier の Webhook などが接続先として利用できます。
+未設定時は問い合わせが失われないよう、API は `503 Service Unavailable` を返します。
+
+API は `application/json` のリクエストのみを受け付け、リクエストボディを 16 KiB に制限します。
+Webhook が 10 秒以内に応答しない場合はタイムアウトとして扱います。
 
 ```json
 {
