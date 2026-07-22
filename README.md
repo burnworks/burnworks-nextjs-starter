@@ -54,6 +54,7 @@ npm run dev
 
 - `npm run dev`: 開発サーバー起動
 - `npm run build`: 本番ビルド
+- `npm test`: Vitest で自動テストを実行
 - `npm run lint`: ESLint 実行
 - `npm run format`: Prettier で整形（ファイルを上書き）
 - `npm run format:check`: Prettier でフォーマットチェックのみ（CI 等で使用）
@@ -135,6 +136,7 @@ Vercel へのデプロイを推奨します。
 - `@types/node`: Node.js v24 系に合わせた Node.js API の型定義。
 - `@types/react`: React の型定義。
 - `@types/react-dom`: React DOM の型定義。
+- `vitest`: 問い合わせ API と環境変数検証の自動テスト実行基盤。
 - `eslint`: 静的解析ツール本体。
 - `eslint-config-next`: Next.js 推奨ルールをまとめた ESLint 設定。
 - `prettier`: コード整形ツール本体。

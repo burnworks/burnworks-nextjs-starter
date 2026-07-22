@@ -95,10 +95,11 @@
 
 1. `npm run format:check`
 2. `npm run lint`
-3. `npm run build`
-4. `NEXT_PUBLIC_SITE_URL` が本番 URL になっているか確認
-5. `NEXT_PUBLIC_SITE_LAST_MODIFIED` をコンテンツの最終更新日に合わせて更新
-6. カメラ、マイク、位置情報を使う場合は `next.config.ts` の `Permissions-Policy` を調整
-7. 外部サービスとデプロイ構成に合わせて CSP・HSTS の追加を検討
+3. `npm test`
+4. `npm run build`
+5. `NEXT_PUBLIC_SITE_URL` が本番 URL になっているか確認
+6. `NEXT_PUBLIC_SITE_LAST_MODIFIED` をコンテンツの最終更新日に合わせて更新
+7. カメラ、マイク、位置情報を使う場合は `next.config.ts` の `Permissions-Policy` を調整
+8. 外部サービスとデプロイ構成に合わせて CSP・HSTS の追加を検討
 
 環境変数のURL・メールアドレス・日付は起動時に検証されます。値を設定する場合、URLは `http://` または `https://` で始まる絶対URL、日付は実在する日付を `YYYY-MM-DD` 形式で指定してください。

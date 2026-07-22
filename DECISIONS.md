@@ -16,7 +16,7 @@
 - TypeScript strict + ESLint を必須
 - フォーマットは Prettier で統一
 - pre-commit で最低限の整形と lint を実行
-- CI で `lint` と `build` を検証
+- CI で `lint`、問い合わせ API・環境変数の自動テスト、`build` を検証
 
 ## SEO
 
