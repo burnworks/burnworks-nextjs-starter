@@ -11,11 +11,12 @@
 - `/api/contact` + クライアントフォーム（Webhook 連携可能）
 - 汎用的な基本セキュリティヘッダー
 - ESLint + Prettier + Husky + lint-staged
-- GitHub Actions CI（lint + build）
+- GitHub Actions CI（lint + test + build）
 
 ## Prerequisites
 
-- Node.js `v24.14.0` LTS（開発環境の前提バージョン）
+- Node.js `v24.19.0` 以上
+- npm `v11.0.0` 以上
 
 ## Getting Started
 
